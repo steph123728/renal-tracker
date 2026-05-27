@@ -92,13 +92,16 @@
         th, td { padding: 10px 5px; border-bottom: 1px solid #eee; text-align: center; }
         .details-box { display: none; background: #f9f9f9; padding: 12px; border-radius: 8px; margin-top: 5px; font-size: 0.85rem; text-align: left; border: 1px solid #ddd; line-height: 1.6; }
         .view-btn { background: #ecf0f1; color: #2c3e50; padding: 5px 8px; font-size: 0.75rem; border: 1px solid #bdc3c7; width: auto; display: inline-block; }
+        .food-input-group { display: flex; gap: 5px; margin-bottom: 10px; }
+        .food-input-group input { flex: 2; }
+        .food-input-group select { flex: 1; }
     </style>
 </head>
 <body>
 <div id="pinOverlay" style="position: fixed; inset: 0; background: #2c3e50; display: flex; justify-content: center; align-items: center; z-index: 1000;">
     <div class="card" style="width: 280px; text-align: center; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
         <h3>我的健康日誌 - 解鎖 📝🔓</h3>
-        <input type="password" id="pinInput" maxlength="4" placeholder="輸入 4 位 PIN" inputmode="numeric" style="text-align:center; font-size: 20px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+        <input type="password" id="pinInput" maxlength="4" placeholder="輸入 4 位 PIN" inputmode="numeric" style="text-align:center; font-size: 20px; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
         <button id="loginBtn" onclick="processLoginManual()" style="background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer;">解鎖</button>
     </div>
 </div>
@@ -137,7 +140,15 @@
         <!-- 🥗 Food Card -->
         <div class="card food-section">
             <h2>🥗 食物紀錄</h2>
-            <input type="text" id="foodName" placeholder="輸入食物">
+            <div class="food-input-group">
+                <input type="text" id="foodName" placeholder="輸入食物">
+                <select id="mealType">
+                    <option value="早餐">早餐</option>
+                    <option value="午餐">午餐</option>
+                    <option value="晚餐">晚餐</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
             <button onclick="addFood()" style="background:#689f38;">紀錄</button>
             <div id="dailyFoodList" style="margin-top:10px;"></div>
         </div>
@@ -208,7 +219,7 @@
 
     <!-- Bottom Controls (Now neatly bounded at the foot of mainApp) -->
     <button onclick="location.reload()" style="background:#34495e; margin-top:20px;">登出</button>
-    <button style="background: #95a5a6; font-size: 12px; margin-top: 10px; border-radius: 8px; color: white; border: none; padding: 8px; width: 100%; margin-bottom: 50px;" onclick="if(confirm('確定要清除所有紀錄嗎？')) { localStorage.clear(); location.reload(); }">清除所有紀錄</button>
+    <button style="background: #95a5a6; font-size: 12px; margin-top: 10px; border-radius: 8px; color: white; border: none; padding: 8px; width: 100%; margin-bottom: 50px;" onclick="if(confirm('確定要清除所有數據嗎？此操作無法復原。')) { localStorage.clear(); location.reload(); }">🗑️ 清除所有數據</button>
 </div> <!-- Safe closure of mainApp -->
 
 <script>
@@ -300,7 +311,7 @@
         let missed = checkSlots.filter(slot => curHour > slot.hour || (curHour === slot.hour && curMin >= 5)) 
                                .filter(slot => !(s.m || []).some(log => log.timeSlot === slot.label)).map(slot => slot.label);
         if (missed.length > 0) {
-            feedbackContent += `<div style="color: #e67e22; margin-top: 10px; font-weight: bold; border-top: 1px solid rgba(230, 126, 34, 0.2); padding-top: 8px;">⚠️ 注意：暫時沒有 ${missed.join('、')} 的用藥紀錄</div>`;
+            feedbackContent += `<div style="color: #e67e22; margin-top: 10px; font-weight: bold; border-top: 1px solid rgba(230, 126, 34, 0.2); padding-top: 8px;">⚠️ 注意：暫時沒有 ${missed.join('、')} 的用藥紀錄！</div>`;
         }
         if (summaryDiv) {
             summaryDiv.innerHTML = feedbackContent;
@@ -339,7 +350,7 @@
         const builder = (logs, k) => (logs || []).map(x => `
             <div class="entry-log-item">
                 <div style="display:flex; justify-content:space-between; align-items: flex-start;">
-                    <div>[${x.timeOfUse || x.time}] ${x.name || x.label || x.timeSlot || (x.systolic + '/' + x.diastolic)} ${x.amt ? x.amt + 'mL' : ''} @${x.location || '未註明'}${x.comment ? `<div class="medical-comment">${x.comment}</div>` : ''}</div>
+                    <div>[${x.timeOfUse || x.time}] ${x.name || x.label || x.timeSlot || (x.systolic + '/' + x.diastolic)} ${x.amt ? x.amt + 'mL' : ''} ${x.mealType ? '(' + x.mealType + ')' : ''} @${x.location || '未註明'}${x.comment ? `<div class="medical-comment">${x.comment}</div>` : ''}</div>
                     <div style="display:flex; gap:5px; margin-left:10px;">
                         <button onclick="editItem('${k}', ${x.id})" style="background:#f1c40f; color:black; padding:4px 8px; font-size:10px; width:auto; margin:0;">修改</button> 
                         <button onclick="deleteItem('${k}', ${x.id})" style="background:#e74c3c; color:white; padding:4px 8px; font-size:10px; width:auto; margin:0;">刪除</button>
@@ -356,12 +367,13 @@
     // 3. ACTIONS
     function addFood() {
         const n = document.getElementById('foodName').value; if(!n) return;
+        const mealType = document.getElementById('mealType').value;
         const comment = (function(f){
-            let r = []; if (HIGH_PHOS_KEYWORDS.some(k=>f.includes(k)) || f.includes("加工") || f.includes("火腿") || f.includes("香腸")) { r.push("⛔<br>注意高磷食物！<br>請先跟註冊營養師確認"); }
+            let r = []; if (HIGH_PHOS_KEYWORDS.some(k=>f.includes(k)) || f.includes("加工") || f.includes("火腿") || f.includes("香腸")) { r.push("⛔<br>注意高磷食物！<br>請先跟註冊營養師討論。"); }
             if (HIGH_PRO_KEYWORDS.some(k=>f.includes(k))) { r.push("⚠️<br>高蛋白食物！<br>請適量進食"); }
             return r.join("");
         })(n);
-        const entry = { id: Date.now(), date: getTodayKey(), time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), timeOfUse: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), name: n, comment, risk: comment.includes("⛔"), location: getSelectedLocation() };
+        const entry = { id: Date.now(), date: getTodayKey(), time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), timeOfUse: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), name: n, mealType: mealType, comment: comment, location: getSelectedLocation() };
         let l = JSON.parse(localStorage.getItem('d_logs') || '[]'); l.unshift(entry); localStorage.setItem('d_logs', JSON.stringify(l));
         document.getElementById('foodName').value = ''; updateUI();
     }
@@ -371,7 +383,7 @@
         const type = document.getElementById('fluidType').value;
         const note = document.getElementById('fluidNote').value;
         const label = (type === '其他' && note) ? `其他(${note})` : type;
-        const entry = { id: Date.now(), date: getTodayKey(), time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), timeOfUse: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), amt: a, label, location: getSelectedLocation() };
+        const entry = { id: Date.now(), date: getTodayKey(), time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), timeOfUse: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), amt: a, label: label, location: getSelectedLocation() };
         let l = JSON.parse(localStorage.getItem('f_logs') || '[]'); l.unshift(entry); localStorage.setItem('f_logs', JSON.stringify(l));
         document.getElementById('fluidAmt').value = ''; document.getElementById('fluidNote').value = ''; 
         document.getElementById('fluidNote').style.display = 'none'; document.getElementById('fluidType').value = '水';
@@ -435,7 +447,7 @@
     function deleteItem(k, id) { if(confirm("刪除？")) { let logs = JSON.parse(localStorage.getItem(k) || '[]'); localStorage.setItem(k, JSON.stringify(logs.filter(l => l.id !== id))); updateUI(); } }
 
     function setupNotifications() {
-        alert("🔔 如何設定用藥提醒：\n\n由於 iPhone 的隱私保護限制，建議你設定手機內建的『鬧鐘』以獲得最穩定的提醒：\n\n1. 打開手機『時鐘』App\n2. 輕按『計時器』→『新增』\n3. 設定提醒時間 (08:00, 12:00, 20:00, 22:00)\n4. 自訂『完成時播放聲音』選項\n5. 儲存即可！");
+        alert("🔔 如何設定用藥提醒：\n\n由於 iPhone 的隱私保護限制，建議你設定手機內建的『鬧鐘』以獲得最穩定的提醒：\n\n1. 打開手機『時鐘』App\n2. 點擊『鬧鐘』分頁\n3. 新增 4 個鬧鐘：08:00、12:00、20:00、22:00\n4. 標籤設為『用藥時間』\n5. 設定『重複』為『每天』\n\n這樣您就會在指定時間收到提醒！💊");
     }
 
     function confirmLocationUpdate() {
@@ -515,7 +527,7 @@
             for(let day=1; day<=total; day++) {
                 const dk = `${curY}-${curM.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
                 const s = calculateDayScore(dk);
-                g.innerHTML += `<div class="cal-day"><div style="font-weight:bold">${day}</div>${s.hasData?`<div class="cal-dot" style="background:${s.color}"></div><div class="cal-note">${s.score===3?'✅ 完美':'⚠️ 檢查'}</div>`:''}`;
+                g.innerHTML += `<div class="cal-day"><div style="font-weight:bold">${day}</div>${s.hasData?`<div class="cal-dot" style="background:${s.color}"></div><div class="cal-note">${s.reasons.length > 0 ? s.reasons.join('<br>') : '✅'}</div>`:''}</div>`;
             }
             c.appendChild(g);
         });
@@ -528,7 +540,7 @@
             const s = calculateDayScore(d); const id = d.replace(/-/g, '_');
             return `<tr><td>${d}<br><button class="view-btn" onclick="const e=document.getElementById('det-${id}'); e.style.display=e.style.display==='block'?'none':'block';">查看詳情</button></td>
                 <td>${s.mOk?'✅':'❌'}</td><td>${s.fOk?'✅':'❌'}</td><td>${s.dOk?'✅':'❌'}</td></tr>
-            <tr><td colspan="4"><div id="det-${id}" class="details-box">藥物: ${s.m.map(x=>x.timeSlot).join(', ') || '無'}<br>飲水: ${s.fSum}mL<br>飲食: ${s.d.map(x=>x.name).join(', ') || '無'}<br>血壓: ${s.bp.map(x=>`${x.systolic}/${x.diastolic}`).join(', ') || '無'}</div></tr>`;
+            <tr><td colspan="4"><div id="det-${id}" class="details-box">藥物: ${s.m.map(x=>x.timeSlot).join(', ') || '無'}<br>飲水: ${s.fSum}mL<br>飲食: ${s.d.map(x=>`${x.name} (${x.mealType})`).join(', ') || '無'}<br>血壓: ${s.bp.map(x=>`${x.systolic}/${x.diastolic}`).join(', ') || '無'}</div></td></tr>`;
         }).join('');
     }
 
@@ -580,7 +592,7 @@
             for(let d=1; d<=total; d++) {
                 const dk = `${y}-${m.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
                 const s = calculateDayScore(dk);
-                gHtml += `<div class="cal-day"><div>${d}</div>${s.hasData ? `<div class="cal-dot" style="background:${s.color}"></div><div class="cal-note">${s.reasons.join('<br>')}</div>` : ''}</div>`;
+                gHtml += `<div class="cal-day"><div>${d}</div>${s.hasData ? `<div class="cal-dot" style="background:${s.color}"></div><div class="cal-note">${s.reasons.length > 0 ? s.reasons.join('<br>') : '✅'}</div>` : ''}</div>`;
             }
             pdfCal.innerHTML += gHtml + `</div>`;
         });
@@ -593,7 +605,7 @@
                     <h3>日期: ${d}</h3>
                     <p>💊 藥物: ${s.m.map(x=>`[${x.time}] ${x.timeSlot}`).join(', ') || '無'}</p>
                     <p>💧 飲水: ${s.fSum}mL</p>
-                    <p>🥗 飲食: ${s.d.map(x=>`${x.name} ${x.comment?'('+x.comment+')':''}`).join('; ') || '無'}</p>
+                    <p>🥗 飲食: ${s.d.map(x=>`[${x.mealType}] ${x.name} ${x.comment?'('+x.comment+')':''}`).join('; ') || '無'}</p>
                     <p>🩸 血壓: ${s.bp.map(x=>`[${x.time}] ${x.systolic}/${x.diastolic}`).join(', ') || '無'}</p>
                 </div>`);
             }
