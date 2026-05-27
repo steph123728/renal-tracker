@@ -93,8 +93,8 @@
         .details-box { display: none; background: #f9f9f9; padding: 12px; border-radius: 8px; margin-top: 5px; font-size: 0.85rem; text-align: left; border: 1px solid #ddd; line-height: 1.6; }
         .view-btn { background: #ecf0f1; color: #2c3e50; padding: 5px 8px; font-size: 0.75rem; border: 1px solid #bdc3c7; width: auto; display: inline-block; }
         .food-input-group { display: flex; gap: 5px; margin-bottom: 10px; }
-        .food-input-group input { flex: 2; }
-        .food-input-group select { flex: 1; }
+        .food-input-group select { flex: 0 0 auto; width: auto; min-width: 100px; }
+        .food-input-group input { flex: 1; }
     </style>
 </head>
 <body>
@@ -141,13 +141,13 @@
         <div class="card food-section">
             <h2>🥗 食物紀錄</h2>
             <div class="food-input-group">
-                <input type="text" id="foodName" placeholder="輸入食物">
                 <select id="mealType">
                     <option value="早餐">早餐</option>
                     <option value="午餐">午餐</option>
                     <option value="晚餐">晚餐</option>
                     <option value="其他">其他</option>
                 </select>
+                <input type="text" id="foodName" placeholder="輸入食物">
             </div>
             <button onclick="addFood()" style="background:#689f38;">紀錄</button>
             <div id="dailyFoodList" style="margin-top:10px;"></div>
@@ -605,7 +605,7 @@
                     <h3>日期: ${d}</h3>
                     <p>💊 藥物: ${s.m.map(x=>`[${x.time}] ${x.timeSlot}`).join(', ') || '無'}</p>
                     <p>💧 飲水: ${s.fSum}mL</p>
-                    <p>🥗 飲食: ${s.d.map(x=>`[${x.mealType}] ${x.name} ${x.comment?'('+x.comment+')':''}`).join('; ') || '無'}</p>
+                    <p>🥗 飲食: ${s.d.map(x=>`[${x.mealType}] ${x.name}`).join('; ') || '無'}</p>
                     <p>🩸 血壓: ${s.bp.map(x=>`[${x.time}] ${x.systolic}/${x.diastolic}`).join(', ') || '無'}</p>
                 </div>`);
             }
