@@ -604,7 +604,7 @@
                 win.document.write(`<div class="day-block">
                     <h3>日期: ${d}</h3>
                     <p>💊 藥物: ${s.m.map(x=>`[${x.time}] ${x.timeSlot}`).join(', ') || '無'}</p>
-                    <p>💧 飲水: ${s.fSum}mL</p>
+                    <p>💧 飲水: ${s.f.map(x=>`[${x.time}] ${x.amt}mL (${x.label})`).join('; ') || '無'}</p>
                     <p>🥗 飲食: ${s.d.map(x=>`[${x.mealType}] ${x.name}`).join('; ') || '無'}</p>
                     <p>🩸 血壓: ${s.bp.map(x=>`[${x.time}] ${x.systolic}/${x.diastolic}`).join(', ') || '無'}</p>
                 </div>`);
